@@ -22,6 +22,17 @@ interface ProgramData {
 
 const DEGREE_TYPES = ["certificate","diploma","bachelor","master","phd"];
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function ProgramForm({
   programId,
   initial,
@@ -82,15 +93,6 @@ export default function ProgramForm({
     }
   }
 
-  const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-
   const input = "w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-navy transition-colors bg-white";
   const textarea = `${input} resize-none`;
 
@@ -129,13 +131,13 @@ export default function ProgramForm({
         {/* Main */}
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-6 space-y-5">
-            <F label="Program Name *">
+            <Field label="Program Name *">
               <input required value={form.name} placeholder="e.g. Bachelor of Science in Nursing"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className={input} />
-            </F>
+            </Field>
             <div className="grid sm:grid-cols-2 gap-5">
-              <F label="Degree Type *">
+              <Field label="Degree Type *">
                 <select value={form.degreeType}
                   onChange={(e) => setForm({ ...form, degreeType: e.target.value as ProgramData["degreeType"] })}
                   className={input}>
@@ -143,34 +145,34 @@ export default function ProgramForm({
                     <option key={d} value={d} className="capitalize">{d.charAt(0).toUpperCase() + d.slice(1)}</option>
                   ))}
                 </select>
-              </F>
-              <F label="Duration (years)">
+              </Field>
+              <Field label="Duration (years)">
                 <input type="number" step="0.5" min="0.5" max="10"
                   value={form.durationYears ?? ""}
                   onChange={(e) => setForm({ ...form, durationYears: e.target.value ? Number(e.target.value) : null })}
                   className={input} />
-              </F>
+              </Field>
             </div>
-            <F label="Description">
+            <Field label="Description">
               <textarea rows={4} value={form.description ?? ""}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Program overview…" className={textarea} />
-            </F>
-            <F label="Learning Objectives">
+            </Field>
+            <Field label="Learning Objectives">
               <textarea rows={4} value={form.objectives ?? ""}
                 onChange={(e) => setForm({ ...form, objectives: e.target.value })}
                 placeholder="What students will learn…" className={textarea} />
-            </F>
-            <F label="Career Outcomes">
+            </Field>
+            <Field label="Career Outcomes">
               <textarea rows={3} value={form.careerOutcomes ?? ""}
                 onChange={(e) => setForm({ ...form, careerOutcomes: e.target.value })}
                 placeholder="Career paths for graduates…" className={textarea} />
-            </F>
-            <F label="Admission Requirements">
+            </Field>
+            <Field label="Admission Requirements">
               <textarea rows={3} value={form.admissionReq ?? ""}
                 onChange={(e) => setForm({ ...form, admissionReq: e.target.value })}
                 placeholder="Specific requirements for this program…" className={textarea} />
-            </F>
+            </Field>
           </div>
         </div>
 
@@ -178,7 +180,7 @@ export default function ProgramForm({
         <div className="space-y-5">
           <div className="card p-5 space-y-4">
             <h3 className="font-semibold text-sm" style={{ color: "var(--clr-navy)" }}>Organization</h3>
-            <F label="Category">
+            <Field label="Category">
               <select value={form.categoryId ?? ""}
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value ? Number(e.target.value) : null })}
                 className={input}>
@@ -187,12 +189,12 @@ export default function ProgramForm({
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
-            </F>
-            <F label="Sort Order">
+            </Field>
+            <Field label="Sort Order">
               <input type="number" min="0" value={form.sortOrder}
                 onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
                 className={input} />
-            </F>
+            </Field>
           </div>
 
           {/* Thumbnail */}

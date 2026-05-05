@@ -22,6 +22,32 @@ const schema = z.object({
 
 interface Ctx { params: { id: string } }
 
+function normalizeProgramPayload(payload: unknown) {
+  if (!payload || typeof payload !== "object") return payload;
+  const input = payload as Record<string, unknown>;
+
+  const normalizeNullableString = (value: unknown) => {
+    if (value == null) return "";
+    return String(value);
+  };
+
+  const normalizeBoolean = (value: unknown) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value === 1;
+    if (typeof value === "string") return value === "1" || value.toLowerCase() === "true";
+    return false;
+  };
+
+  return {
+    ...input,
+    description: normalizeNullableString(input.description),
+    objectives: normalizeNullableString(input.objectives),
+    careerOutcomes: normalizeNullableString(input.careerOutcomes),
+    admissionReq: normalizeNullableString(input.admissionReq),
+    isPublished: normalizeBoolean(input.isPublished),
+  };
+}
+
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const rows = await query(
     `SELECT p.*, pc.name AS categoryName
@@ -38,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const data = schema.parse(body);
+  const data = schema.parse(normalizeProgramPayload(body));
   const slug = slugify(data.name, { lower: true, strict: true });
 
   await execute(

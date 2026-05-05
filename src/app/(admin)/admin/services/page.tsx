@@ -17,6 +17,17 @@ const blank = (): Partial<Service> => ({
   name: "", description: "", icon: "BookOpen", imageUrl: "", sortOrder: 0, isActive: true,
 });
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -61,12 +72,6 @@ export default function AdminServicesPage() {
   }
 
   const inp = "w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-navy bg-white transition-colors";
-  const F   = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div>
@@ -92,17 +97,17 @@ export default function AdminServicesPage() {
                 {editId === "new" ? "Add Service" : "Edit Service"}
               </h2>
               <div className="space-y-4">
-                <F label="Service Name *">
+                <Field label="Service Name *">
                   <input required value={editing.name ?? ""}
                     onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                     className={inp} placeholder="e.g. Library Service" />
-                </F>
-                <F label="Description">
+                </Field>
+                <Field label="Description">
                   <textarea rows={3} value={editing.description ?? ""}
                     onChange={(e) => setEditing({ ...editing, description: e.target.value })}
                     className={`${inp} resize-none`} />
-                </F>
-                <F label="Icon (Lucide name)">
+                </Field>
+                <Field label="Icon (Lucide name)">
                   <select value={editing.icon ?? "BookOpen"}
                     onChange={(e) => setEditing({ ...editing, icon: e.target.value })}
                     className={inp}>
@@ -110,18 +115,18 @@ export default function AdminServicesPage() {
                       <option key={ic} value={ic}>{ic}</option>
                     ))}
                   </select>
-                </F>
-                <F label="Image URL">
+                </Field>
+                <Field label="Image URL">
                   <input value={editing.imageUrl ?? ""}
                     onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value || null })}
                     className={inp} placeholder="/uploads/images/..." />
-                </F>
+                </Field>
                 <div className="grid grid-cols-2 gap-4">
-                  <F label="Sort Order">
+                  <Field label="Sort Order">
                     <input type="number" value={editing.sortOrder ?? 0}
                       onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) })}
                       className={inp} />
-                  </F>
+                  </Field>
                   <div className="flex items-end pb-2">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" checked={!!editing.isActive}

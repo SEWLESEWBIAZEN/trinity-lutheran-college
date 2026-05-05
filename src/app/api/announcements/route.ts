@@ -18,40 +18,54 @@ const schema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const publicOnly = searchParams.get("public") === "1";
-  const category   = searchParams.get("category");
-  const page  = Math.max(1, Number(searchParams.get("page")  ?? 1));
-  const limit = Math.min(50, Number(searchParams.get("limit") ?? 20));
-  const offset = (page - 1) * limit;
+  try {
+    const { searchParams } = new URL(req.url);
+    const publicOnly = searchParams.get("public") === "1";
+    const category = searchParams.get("category");
+    const pageRaw = Number(searchParams.get("page") ?? 1);
+    const limitRaw = Number(searchParams.get("limit") ?? 20);
+    const page = Number.isFinite(pageRaw) ? Math.max(1, Math.floor(pageRaw)) : 1;
+    const limit = Number.isFinite(limitRaw)
+      ? Math.max(1, Math.min(50, Math.floor(limitRaw)))
+      : 20;
+    const offset = (page - 1) * limit;
 
-  const conditions: string[] = [];
-  const values: unknown[]    = [];
+    const conditions: string[] = [];
+    const values: unknown[] = [];
 
-  if (publicOnly) { conditions.push("a.is_published = 1"); }
-  if (category)   { conditions.push("a.category = ?"); values.push(category); }
+    if (publicOnly) conditions.push("a.is_published = 1");
+    if (category) {
+      conditions.push("a.category = ?");
+      values.push(category);
+    }
 
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  const rows = await query(
-    `SELECT a.id, a.title, a.slug, a.excerpt, a.cover_url AS coverUrl,
-            a.category, a.event_date AS eventDate,
-            a.is_published AS isPublished, a.is_pinned AS isPinned,
-            a.published_at AS publishedAt, a.created_at AS createdAt,
-            u.name AS authorName
-     FROM announcements a
-     LEFT JOIN users u ON a.author_id = u.id
-     ${where}
-     ORDER BY a.is_pinned DESC, a.published_at DESC, a.created_at DESC
-     LIMIT ? OFFSET ?`,
-    [...values, limit, offset]
-  );
+    const rows = await query(
+      `SELECT a.id, a.title, a.slug, a.excerpt, a.cover_url AS coverUrl,
+              a.category, a.event_date AS eventDate,
+              a.is_published AS isPublished, a.is_pinned AS isPinned,
+              a.published_at AS publishedAt, a.created_at AS createdAt,
+              u.name AS authorName
+       FROM announcements a
+       LEFT JOIN users u ON a.author_id = u.id
+       ${where}
+       ORDER BY a.is_pinned DESC, a.published_at DESC, a.created_at DESC
+       LIMIT ${limit} OFFSET ${offset}`,
+      values
+    );
 
-  const [{ total }] = await query<{ total: number }>(
-    `SELECT COUNT(*) AS total FROM announcements a ${where}`, values
-  );
+    const [{ total }] = await query<{ total: number }>(
+      `SELECT COUNT(*) AS total FROM announcements a ${where}`,
+      values
+    );
 
-  return NextResponse.json({ success: true, data: rows, total, page, limit });
+    return NextResponse.json({ success: true, data: rows, total, page, limit });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch announcements";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {

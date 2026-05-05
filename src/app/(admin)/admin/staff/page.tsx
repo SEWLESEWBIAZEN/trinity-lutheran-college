@@ -8,6 +8,17 @@ interface Staff {
   department: string; email: string; photoUrl: string; isPublished: boolean;
 }
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function AdminStaffPage() {
   const [staff, setStaff]   = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,12 +56,6 @@ export default function AdminStaffPage() {
   }
 
   const input = "w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-navy bg-white";
-  const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div>
@@ -74,43 +79,43 @@ export default function AdminStaffPage() {
             </h2>
             <div className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <F label="Full Name *">
+                <Field label="Full Name *">
                   <input required value={form.fullName ?? ""} className={input}
                     onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
-                </F>
-                <F label="Title (Dr., Prof.)">
+                </Field>
+                <Field label="Title (Dr., Prof.)">
                   <input value={form.title ?? ""} className={input} placeholder="e.g. Dr."
                     onChange={(e) => setForm({ ...form, title: e.target.value })} />
-                </F>
+                </Field>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <F label="Position">
+                <Field label="Position">
                   <input value={form.position ?? ""} className={input} placeholder="Academic Dean"
                     onChange={(e) => setForm({ ...form, position: e.target.value })} />
-                </F>
-                <F label="Department">
+                </Field>
+                <Field label="Department">
                   <input value={form.department ?? ""} className={input} placeholder="Health Sciences"
                     onChange={(e) => setForm({ ...form, department: e.target.value })} />
-                </F>
+                </Field>
               </div>
-              <F label="Bio">
+              <Field label="Bio">
                 <textarea rows={3} value={form.bio ?? ""} className={`${input} resize-none`}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-              </F>
+              </Field>
               <div className="grid sm:grid-cols-2 gap-4">
-                <F label="Email">
+                <Field label="Email">
                   <input type="email" value={form.email ?? ""} className={input}
                     onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                </F>
-                <F label="Phone">
+                </Field>
+                <Field label="Phone">
                   <input value={form.phone ?? ""} className={input}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                </F>
+                </Field>
               </div>
-              <F label="Photo URL">
+              <Field label="Photo URL">
                 <input value={form.photoUrl ?? ""} className={input} placeholder="/uploads/images/..."
                   onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} />
-              </F>
+              </Field>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input type="checkbox" checked={form.isPublished ?? true}
                   onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} />

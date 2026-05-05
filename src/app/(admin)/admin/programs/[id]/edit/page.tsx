@@ -24,12 +24,12 @@ export default async function EditProgramPage({ params }: Props) {
         name:           p.name,
         degreeType:     p.degree_type as "bachelor",
         durationYears:  p.duration_years,
-        description:    p.description,
-        objectives:     p.objectives,
-        careerOutcomes: p.career_outcomes,
-        admissionReq:   p.admission_req,
+        description:    p.description ?? "",
+        objectives:     p.objectives ?? "",
+        careerOutcomes: p.career_outcomes ?? "",
+        admissionReq:   p.admission_req ?? "",
         thumbnailUrl:   p.thumbnail_url,
-        isPublished:    p.is_published,
+        isPublished:    Boolean(p.is_published),
         sortOrder:      p.sort_order,
       }}
     />

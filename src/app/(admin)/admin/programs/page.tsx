@@ -9,6 +9,20 @@ interface Program {
   categoryName: string; isPublished: boolean; slug: string;
 }
 
+type ProgramApiRow = Record<string, unknown>;
+
+function normalizeProgramRow(row: ProgramApiRow): Program {
+  return {
+    id: Number(row.id ?? 0),
+    name: String(row.name ?? ""),
+    degreeType: String(row.degreeType ?? row.degree_type ?? ""),
+    durationYears: Number(row.durationYears ?? row.duration_years ?? 0),
+    categoryName: String(row.categoryName ?? ""),
+    isPublished: Boolean(row.isPublished ?? row.is_published),
+    slug: String(row.slug ?? ""),
+  };
+}
+
 export default function AdminProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -28,7 +42,10 @@ export default function AdminProgramsPage() {
         );
       }
 
-      setPrograms(json?.data ?? []);
+      const normalized = Array.isArray(json?.data)
+        ? json.data.map((row: ProgramApiRow) => normalizeProgramRow(row))
+        : [];
+      setPrograms(normalized);
     } catch (e) {
       setPrograms([]);
       setError(
@@ -62,10 +79,36 @@ export default function AdminProgramsPage() {
 
   async function togglePublish(p: Program) {
     try {
+      const detailsRes = await fetch(`/api/programs/${p.id}`);
+      const detailsPayload = await detailsRes.json().catch(() => null);
+      if (!detailsRes.ok || !detailsPayload?.data) {
+        const message =
+          detailsPayload?.error ??
+          (detailsRes.status === 401
+            ? "Your session expired. Please log in again."
+            : "Failed to load program details.");
+        setError(message);
+        if (detailsRes.status === 401) window.location.href = "/admin/login";
+        return;
+      }
+
+      const data = detailsPayload.data as ProgramApiRow;
       const res = await fetch(`/api/programs/${p.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...p, isPublished: !p.isPublished }),
+        body: JSON.stringify({
+          categoryId: data.categoryId ?? data.category_id ?? null,
+          name: data.name ?? p.name,
+          degreeType: data.degreeType ?? data.degree_type,
+          durationYears: data.durationYears ?? data.duration_years ?? null,
+          description: data.description ?? "",
+          objectives: data.objectives ?? "",
+          careerOutcomes: data.careerOutcomes ?? data.career_outcomes ?? "",
+          admissionReq: data.admissionReq ?? data.admission_req ?? "",
+          thumbnailUrl: data.thumbnailUrl ?? data.thumbnail_url ?? null,
+          isPublished: !Boolean(data.isPublished ?? data.is_published),
+          sortOrder: data.sortOrder ?? data.sort_order ?? 0,
+        }),
       });
       const payload = await res.json().catch(() => null);
       if (!res.ok) {

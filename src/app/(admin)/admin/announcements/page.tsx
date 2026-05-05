@@ -24,6 +24,25 @@ const blank = (): Partial<Announcement> => ({
   eventDate: "", isPublished: false, isPinned: false,
 });
 
+function Field({
+  label,
+  children,
+  full,
+}: {
+  label: string;
+  children: React.ReactNode;
+  full?: boolean;
+}) {
+  return (
+    <div className={full ? "col-span-2" : ""}>
+      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function AdminAnnouncementsPage() {
   const [items, setItems]       = useState<Announcement[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -31,66 +50,111 @@ export default function AdminAnnouncementsPage() {
   const [form, setForm]         = useState<Partial<Announcement>>(blank());
   const [saving, setSaving]     = useState(false);
   const [filterCat, setFilter]  = useState<Category | "all">("all");
+  const [error, setError]       = useState("");
+
+  async function requestJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
+    const res = await fetch(input, init);
+    const text = await res.text();
+
+    let json: unknown = {};
+    if (text) {
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
+    }
+
+    if (!res.ok) {
+      const apiError =
+        typeof json === "object" && json && "error" in json
+          ? String((json as { error?: unknown }).error ?? "")
+          : "";
+      throw new Error(apiError || `Request failed (${res.status})`);
+    }
+
+    return json as T;
+  }
 
   const load = useCallback(async () => {
-    setLoading(true);
-    const res  = await fetch("/api/announcements?limit=50");
-    const json = await res.json();
-    setItems(json.data ?? []);
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError("");
+      const json = await requestJson<{ data?: Announcement[] }>("/api/announcements?limit=50");
+      setItems(json.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load announcements");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   async function openEdit(id: number) {
-    const res  = await fetch(`/api/announcements/${id}`);
-    const json = await res.json();
-    setForm({
-      ...json.data,
-      isPublished: !!json.data.isPublished,
-      isPinned:    !!json.data.isPinned,
-    });
-    setEditId(id);
+    try {
+      setError("");
+      const json = await requestJson<{ data: Partial<Announcement> }>(`/api/announcements/${id}`);
+      setForm({
+        ...json.data,
+        isPublished: !!json.data.isPublished,
+        isPinned: !!json.data.isPinned,
+      });
+      setEditId(id);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load announcement");
+    }
   }
 
   async function handleSave() {
-    setSaving(true);
-    const method = editId === "new" ? "POST" : "PUT";
-    const url    = editId === "new" ? "/api/announcements" : `/api/announcements/${editId}`;
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    setEditId(null);
-    load();
+    try {
+      setSaving(true);
+      setError("");
+      const method = editId === "new" ? "POST" : "PUT";
+      const url = editId === "new" ? "/api/announcements" : `/api/announcements/${editId}`;
+      await requestJson(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setEditId(null);
+      load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to save announcement");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete(id: number, title: string) {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await fetch(`/api/announcements/${id}`, { method: "DELETE" });
-    load();
+    try {
+      setError("");
+      await requestJson(`/api/announcements/${id}`, { method: "DELETE" });
+      load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete announcement");
+    }
   }
 
   async function togglePublish(item: Announcement) {
-    await fetch(`/api/announcements/${item.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...item, isPublished: !item.isPublished }),
-    });
-    load();
+    try {
+      setError("");
+      await requestJson(`/api/announcements/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...item, isPublished: !item.isPublished }),
+      });
+      load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to update announcement status");
+    }
   }
 
   const filtered = filterCat === "all" ? items : items.filter((a) => a.category === filterCat);
 
   const inp = "w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-navy bg-white transition-colors";
-  const F   = ({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) => (
-    <div className={full ? "col-span-2" : ""}>
-      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1.5">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div>
@@ -107,6 +171,12 @@ export default function AdminAnnouncementsPage() {
           <Plus className="w-4 h-4" /> New Post
         </button>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Filter tabs */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
@@ -236,13 +306,13 @@ export default function AdminAnnouncementsPage() {
             {/* Form body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
               <div className="grid grid-cols-2 gap-5">
-                <F label="Title *" full>
+                <Field label="Title *" full>
                   <input required value={form.title ?? ""}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     className={inp} placeholder="Announcement title" />
-                </F>
+                </Field>
 
-                <F label="Category">
+                <Field label="Category">
                   <select value={form.category ?? "news"}
                     onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
                     className={inp}>
@@ -250,33 +320,33 @@ export default function AdminAnnouncementsPage() {
                       <option key={c.value} value={c.value}>{c.label}</option>
                     ))}
                   </select>
-                </F>
+                </Field>
 
-                <F label="Event Date">
+                <Field label="Event Date">
                   <input type="date" value={form.eventDate ?? ""}
                     onChange={(e) => setForm({ ...form, eventDate: e.target.value ?? undefined })}
                     className={inp} />
-                </F>
+                </Field>
 
-                <F label="Excerpt" full>
+                <Field label="Excerpt" full>
                   <textarea rows={2} value={form.excerpt ?? ""}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
                     className={`${inp} resize-none`}
                     placeholder="Short summary shown in cards…" />
-                </F>
+                </Field>
 
-                <F label="Cover Image URL" full>
+                <Field label="Cover Image URL" full>
                   <input value={form.coverUrl ?? ""}
                     onChange={(e) => setForm({ ...form, coverUrl: e.target.value ?? undefined })}
                     className={inp} placeholder="/uploads/images/..." />
-                </F>
+                </Field>
 
-                <F label="Full Body" full>
+                <Field label="Full Body" full>
                   <textarea rows={12} value={form.body ?? ""}
                     onChange={(e) => setForm({ ...form, body: e.target.value })}
                     className={`${inp} resize-none`}
                     placeholder="Full announcement content…" />
-                </F>
+                </Field>
               </div>
             </div>
           </div>

@@ -110,6 +110,41 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/programs/[slug]/page.js"
+    ],
+    "/(admin)/admin/staff/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/staff/page.js"
+    ],
+    "/(admin)/admin/programs/[id]/edit/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/programs/[id]/edit/page.js"
+    ],
+    "/(admin)/admin/announcements/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/announcements/page.js"
+    ],
+    "/(admin)/admin/messages/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/messages/page.js"
+    ],
+    "/(admin)/admin/services/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/services/page.js"
+    ],
+    "/(admin)/admin/content/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/content/page.js"
+    ],
+    "/(admin)/admin/admissions/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(admin)/admin/admissions/page.js"
     ]
   }
 }

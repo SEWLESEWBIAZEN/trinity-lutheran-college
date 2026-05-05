@@ -39,7 +39,7 @@ export default async function ProgramsPage() {
 
       {byCategory.map((cat) =>
         cat.programs.length === 0 ? null : (
-          <section key={cat.id} className="mb-16">
+          <section key={cat.id} className="mb-16 mx-auto">
             <h2 className="font-playfair text-2xl font-bold mb-1"
               style={{ color: "var(--clr-navy)" }}>{cat.name}</h2>
             {cat.description && (

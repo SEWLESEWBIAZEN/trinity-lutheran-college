@@ -1,13 +1,9 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/branding/logo/route": "app/api/branding/logo/route.js",
-  "/(public)/media/page": "app/(public)/media/page.js",
-  "/(public)/admissions/page": "app/(public)/admissions/page.js",
-  "/(public)/news/page": "app/(public)/news/page.js",
-  "/(public)/contact/page": "app/(public)/contact/page.js",
-  "/(admin)/admin/page": "app/(admin)/admin/page.js",
-  "/(admin)/admin/login/page": "app/(admin)/admin/login/page.js",
-  "/(public)/page": "app/(public)/page.js",
-  "/(public)/programs/[slug]/page": "app/(public)/programs/[slug]/page.js",
-  "/(public)/programs/page": "app/(public)/programs/page.js"
+  "/api/announcements/route": "app/api/announcements/route.js",
+  "/(public)/programs/page": "app/(public)/programs/page.js",
+  "/(admin)/admin/programs/[id]/edit/page": "app/(admin)/admin/programs/[id]/edit/page.js",
+  "/(admin)/admin/media/page": "app/(admin)/admin/media/page.js",
+  "/(admin)/admin/staff/page": "app/(admin)/admin/staff/page.js",
+  "/(admin)/admin/announcements/page": "app/(admin)/admin/announcements/page.js"
 }
