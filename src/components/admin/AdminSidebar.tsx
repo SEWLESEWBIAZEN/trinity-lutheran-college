@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import CollegeLogo from "@/components/branding/CollegeLogo";
+import { useNavigationProgress } from "@/components/navigation/NavigationProgressProvider";
 import {
   LayoutDashboard, GraduationCap, Image, Users,
   FileText, MessageSquare, Settings, BookOpen, ChevronRight,
@@ -23,6 +24,27 @@ const NAV = [
 
 export default function AdminSidebar() {
   const path = usePathname();
+  const { startNavigation } = useNavigationProgress();
+
+  const handleLinkClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    if (href !== path) {
+      startNavigation();
+    }
+  };
 
   return (
     <aside className="w-60 shrink-0 flex flex-col bg-white border-r border-stone-200 overflow-y-auto">
@@ -41,6 +63,7 @@ export default function AdminSidebar() {
           const active = href === "/admin" ? path === "/admin" : path.startsWith(href);
           return (
             <Link key={href} href={href}
+              onClick={(event) => handleLinkClick(event, href)}
               className={clsx("nav-item group", active && "active")}>
               <Icon className="w-4 h-4 shrink-0" />
               <span className="flex-1">{label}</span>

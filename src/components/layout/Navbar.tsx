@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import clsx from "clsx";
 import CollegeLogo from "@/components/branding/CollegeLogo";
+import { useNavigationProgress } from "@/components/navigation/NavigationProgressProvider";
 
 const NAV_LINKS = [
   { href: "/",               label: "Home" },
@@ -22,6 +23,27 @@ export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { startNavigation } = useNavigationProgress();
+
+  const handleLinkClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    if (href !== pathname) {
+      startNavigation();
+    }
+  };
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -40,7 +62,11 @@ export default function Navbar() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+        <Link
+          href="/"
+          onClick={(event) => handleLinkClick(event, "/")}
+          className="flex items-center gap-2.5 shrink-0"
+        >
           <CollegeLogo size={36} className="rounded-lg" />
           <span className="hidden sm:block font-playfair font-bold text-base leading-tight"
             style={{ color: "var(--clr-navy)" }}>
@@ -58,6 +84,7 @@ export default function Navbar() {
               <li key={href}>
                 <Link
                   href={href}
+                  onClick={(event) => handleLinkClick(event, href)}
                   className={clsx(
                     "px-3.5 py-2 rounded-md text-sm font-medium transition-colors",
                     active
@@ -74,7 +101,11 @@ export default function Navbar() {
         </ul>
 
         {/* CTA */}
-        <Link href="/admissions" className="btn-gold hidden lg:inline-flex text-xs px-4 py-2">
+        <Link
+          href="/admissions"
+          onClick={(event) => handleLinkClick(event, "/admissions")}
+          className="btn-gold hidden lg:inline-flex text-xs px-4 py-2"
+        >
           Apply Now
         </Link>
 
@@ -97,7 +128,10 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
-                onClick={() => setOpen(false)}
+                onClick={(event) => {
+                  handleLinkClick(event, href);
+                  setOpen(false);
+                }}
                 className={clsx(
                   "block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   active ? "text-white" : "text-stone-700 hover:bg-stone-100"
@@ -108,7 +142,14 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link href="/admissions" onClick={() => setOpen(false)} className="btn-gold w-full justify-center mt-2">
+          <Link
+            href="/admissions"
+            onClick={(event) => {
+              handleLinkClick(event, "/admissions");
+              setOpen(false);
+            }}
+            className="btn-gold w-full justify-center mt-2"
+          >
             Apply Now
           </Link>
         </div>

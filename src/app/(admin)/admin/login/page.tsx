@@ -2,12 +2,12 @@
 // src/app/(admin)/admin/login/page.tsx
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import CollegeLogo from "@/components/branding/CollegeLogo";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm]       = useState({ email: "", password: "" });
   const [showPw, setShowPw]   = useState(false);
   const [error, setError]     = useState("");
@@ -17,15 +17,15 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    const callbackUrl = searchParams.get("callbackUrl") || "/admin";
     const res = await signIn("credentials", {
-      redirect: false,
+      redirect: true,
+      callbackUrl,
       email: form.email,
       password: form.password,
     });
-    setLoading(false);
-    if (res?.ok) {
-      router.push("/admin");
-    } else {
+    if (res?.error) {
+      setLoading(false);
       setError("Invalid email or password.");
     }
   }
