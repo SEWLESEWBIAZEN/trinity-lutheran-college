@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 type NavigationProgressContextValue = {
   isNavigating: boolean;
@@ -24,7 +24,6 @@ export function NavigationProgressProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -48,7 +47,7 @@ export function NavigationProgressProvider({
   useEffect(() => {
     setIsNavigating(false);
     clearPendingTimeout();
-  }, [pathname, searchParams, clearPendingTimeout]);
+  }, [pathname, clearPendingTimeout]);
 
   useEffect(() => {
     return () => clearPendingTimeout();

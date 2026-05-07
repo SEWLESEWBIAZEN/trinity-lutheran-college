@@ -102,7 +102,7 @@ export default function AdminMediaPage() {
     setError("");
     try {
       const responses = await Promise.all(
-        [...selected].map((id) => fetch(`/api/media/${id}`, { method: "DELETE" }))
+        Array.from(selected).map((id) => fetch(`/api/media/${id}`, { method: "DELETE" }))
       );
       const failed = responses.find((r) => !r.ok);
       if (failed) {

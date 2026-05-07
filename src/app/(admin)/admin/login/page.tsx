@@ -2,12 +2,10 @@
 // src/app/(admin)/admin/login/page.tsx
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import CollegeLogo from "@/components/branding/CollegeLogo";
 
 export default function AdminLoginPage() {
-  const searchParams = useSearchParams();
   const [form, setForm]       = useState({ email: "", password: "" });
   const [showPw, setShowPw]   = useState(false);
   const [error, setError]     = useState("");
@@ -17,7 +15,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+    const callbackUrl = new URLSearchParams(window.location.search).get("callbackUrl") || "/admin";
     const res = await signIn("credentials", {
       redirect: true,
       callbackUrl,

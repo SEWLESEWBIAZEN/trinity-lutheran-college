@@ -118,7 +118,7 @@ export default function AdminServicesPage() {
                 </Field>
                 <Field label="Image URL">
                   <input value={editing.imageUrl ?? ""}
-                    onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value || null })}
+                    onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value || "" })}
                     className={inp} placeholder="/uploads/images/..." />
                 </Field>
                 <div className="grid grid-cols-2 gap-4">
