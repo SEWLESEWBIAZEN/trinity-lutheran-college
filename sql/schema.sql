@@ -201,7 +201,7 @@ CREATE TABLE contact_messages (
 );
 
 -- ─────────────────────────────────────────────
--- SEED: default admin user  (password: Admin@1234 – bcrypt)
+-- SEED: default admin user 
 -- ─────────────────────────────────────────────
 INSERT INTO users (name, email, password_hash, role) VALUES (
   'Super Admin',
