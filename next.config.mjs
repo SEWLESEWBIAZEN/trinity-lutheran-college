@@ -7,7 +7,13 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   experimental: {
-    serverActions: { allowedOrigins: ["localhost:3000"] },
+    serverActions: {
+      allowedOrigins: [
+        "localhost:3000",
+        "trinitylutherancollege.edu.et",
+        "www.trinitylutherancollege.edu.et",
+      ],
+    },
   },
 };
 
